@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import axios from "axios";
@@ -11,10 +12,6 @@ import Footer from "../../Components/Footer";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function PopularService() {
-  const { serviceName } = useParams();
-  const location = useLocation();
-  const service = location.state?.service || { name: decodeURIComponent(serviceName || '') };
-
   const pageVariants = {
     initial: { opacity: 0, y: 20 },
     in: { opacity: 1, y: 0 },
@@ -27,106 +24,51 @@ export default function PopularService() {
     duration: 0.8
   };
 
+  const { serviceName } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const service = location.state?.service || { name: decodeURIComponent(serviceName || '') };
+
+  // Redirect to browse if service name is not available
+  useEffect(() => {
+    if (!service.name) {
+      navigate('/client/browse');
+    }
+  }, [service.name, navigate]);
+
+
+
   const heroRef = useRef(null);
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
   const freelancersRef = useRef(null);
   const freelancerCardsRef = useRef([]);
   const [bookingLoading, setBookingLoading] = useState(null);
+  const [freelancers, setFreelancers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const services = [
-    "Home Cleaning",
-    "Plumbing",
-    "Electrical Work",
-    "Carpentry",
-    "Mechanics",
-    "Gardening",
-    "AC & Appliance Repair",
-    "Home Painting",
-    "Cleaning & Pest Control",
-    "Electronics & Gadgets"
-  ];
 
-  const locations = [
-    "Delhi",
-    "Mumbai",
-    "Bangalore",
-    "Ahmedabad",
-    "Pune",
-    "Chennai",
-    "Hyderabad",
-    "Kolkata",
-    "Jaipur",
-    "Surat"
-  ];
 
-  const generateFreelancersForService = (selectedService) => {
-    const freelancerList = [];
-    let id = 1;
-
-    const names = [
-      "Rajesh Kumar", "Priya Sharma", "Amit Singh", "Sneha Patel", "Vikram Rao",
-      "Kavita Jain", "Arjun Mehta", "Meera Joshi", "Ravi Gupta", "Anjali Verma",
-      "Suresh Reddy", "Nisha Agarwal", "Deepak Sharma", "Poonam Singh", "Manoj Yadav",
-      "Rekha Nair", "Karan Kapoor", "Sunita Roy", "Vivek Tiwari", "Alisha Khan",
-      "Rohit Das", "Neha Saxena", "Ajay Kumar", "Kiran Bhatia", "Sanjay Mishra",
-      "Priyanka Choudhury", "Rahul Jain", "Shweta Gupta", "Ankit Sharma", "Divya Patel",
-      "Ravi Sharma", "Kavita Singh", "Arjun Patel", "Meera Rao", "Ravi Jain",
-      "Anjali Mehta", "Suresh Joshi", "Nisha Gupta", "Deepak Verma", "Poonam Reddy",
-      "Manoj Agarwal", "Rekha Sharma", "Karan Singh", "Sunita Patel", "Vivek Rao",
-      "Alisha Jain", "Rohit Mehta", "Neha Joshi", "Ajay Gupta", "Kiran Verma"
-    ];
-
-    const maleNames = [
-      "Rajesh Kumar", "Amit Singh", "Vikram Rao", "Arjun Mehta", "Ravi Gupta",
-      "Suresh Reddy", "Deepak Sharma", "Manoj Yadav", "Karan Kapoor", "Vivek Tiwari",
-      "Rohit Das", "Ajay Kumar", "Sanjay Mishra", "Rahul Jain", "Ankit Sharma",
-      "Ravi Sharma", "Arjun Patel", "Ravi Jain", "Suresh Joshi", "Deepak Verma",
-      "Manoj Agarwal", "Karan Singh", "Vivek Rao", "Rohit Mehta", "Ajay Gupta"
-    ];
-
-    locations.forEach(location => {
-      for (let i = 0; i < 15; i++) {
-        const name = names[Math.floor(Math.random() * names.length)];
-        const gender = maleNames.includes(name) ? 'men' : 'women';
-        const rating = (4.0 + Math.random() * 1.0).toFixed(1);
-        const reviews = Math.floor(Math.random() * 300) + 50;
-        const price = `₹${200 + Math.floor(Math.random() * 300)}/hr`;
-        const experienceYears = 3 + Math.floor(Math.random() * 8);
-        const experience = `${experienceYears} years`;
-        const completedJobs = Math.floor(Math.random() * 800) + 100;
-        const imageNumber = Math.floor(Math.random() * 99) + 1;
-        const image = `https://randomuser.me/api/portraits/${gender}/${imageNumber}.jpg`;
-
-        freelancerList.push({
-          id: id++,
-          name,
-          service: selectedService,
-          location,
-          rating: parseFloat(rating),
-          reviews,
-          price,
-          image,
-          experience,
-          completedJobs,
-          description: `Professional ${selectedService.toLowerCase()} specialist with ${experienceYears} years of experience. Committed to delivering high-quality service and customer satisfaction.`,
-          skills: [
-            `${selectedService} Expertise`,
-            "Customer Service",
-            "Problem Solving",
-            "Time Management",
-            "Quality Assurance"
-          ],
-          availability: "Available Mon-Sat, 9 AM - 6 PM",
-          responseTime: "< 2 hours"
-        });
+  // Fetch freelancers from API
+  useEffect(() => {
+    const fetchFreelancers = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/freelancers?service=${encodeURIComponent(service.name)}&limit=24`);
+        setFreelancers(response.data);
+      } catch (error) {
+        console.error('Error fetching freelancers:', error);
+        // Fallback to empty array if API fails
+        setFreelancers([]);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
 
-    return freelancerList;
-  };
-
-  const freelancers = generateFreelancersForService(service.name);
+    if (service.name) {
+      fetchFreelancers();
+    }
+  }, [service.name]);
 
   const getServiceDetails = (serviceName) => {
     const serviceDetails = {
@@ -345,13 +287,13 @@ export default function PopularService() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('/api/bookings', {
-        freelancerId: freelancer.id.toString(),
+      await axios.post('/api/bookings/create', {
+        freelancerId: freelancer._id,
         freelancerName: freelancer.name,
-        service: freelancer.service,
+        service: freelancer.services[0].name,
         date,
         time,
-        location,
+        address: location,
         price: freelancer.price
       }, {
         headers: {
@@ -463,71 +405,81 @@ export default function PopularService() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {freelancers.slice(0, 24).map((freelancer, index) => (
-              <div
-                key={freelancer.id}
-                ref={(el) => (freelancerCardsRef.current[index] = el)}
-                className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
-              >
-                <div className="p-6">
-                  <div className="flex items-center mb-4">
-                    <img
-                      src={freelancer.image}
-                      alt={freelancer.name}
-                      className="w-16 h-16 rounded-full object-cover mr-4"
-                    />
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        {freelancer.name}
-                      </h3>
-                      <p className="text-gray-600 font-bold">{freelancer.service}</p>
-                      <p className="text-sm text-gray-500">{freelancer.location}</p>
+            {loading ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-xl text-gray-600">Loading freelancers...</p>
+              </div>
+            ) : freelancers.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-xl text-gray-600">No freelancers found for this service.</p>
+              </div>
+            ) : (
+              freelancers.slice(0, 24).map((freelancer, index) => (
+                <div
+                  key={freelancer._id}
+                  ref={(el) => (freelancerCardsRef.current[index] = el)}
+                  className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                >
+                  <div className="p-6">
+                    <div className="flex items-center mb-4">
+                      <img
+                        src={freelancer.image}
+                        alt={freelancer.name}
+                        className="w-16 h-16 rounded-full object-cover mr-4"
+                      />
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900">
+                          {freelancer.name}
+                        </h3>
+                        <p className="text-gray-600 font-bold">{freelancer.services[0].name}</p>
+                        <p className="text-sm text-gray-500">{freelancer.address}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      <span className="text-yellow-400 text-lg">⭐</span>
-                      <span className="ml-1 text-gray-700 font-medium">
-                        {freelancer.rating}
-                      </span>
-                      <span className="ml-1 text-gray-500 text-sm">
-                        ({freelancer.reviews})
-                      </span>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center">
+                        <span className="text-yellow-400 text-lg">⭐</span>
+                        <span className="ml-1 text-gray-700 font-medium">
+                          {freelancer.rating}
+                        </span>
+                        <span className="ml-1 text-gray-500 text-sm">
+                          ({freelancer.reviews})
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex justify-between text-sm text-gray-600 mb-4">
-                    <span>Experience: {freelancer.experience}</span>
-                    <span>Jobs: {freelancer.completedJobs}</span>
-                  </div>
-
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-green-600 font-medium">Hourly Rate</span>
-                      <span className="text-lg font-bold text-green-600">{freelancer.price}</span>
+                    <div className="flex justify-between text-sm text-gray-600 mb-4">
+                      <span>Experience: {freelancer.experience}</span>
+                      <span>Jobs: {freelancer.completedJobs}</span>
                     </div>
-                  </div>
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleQuickBook(freelancer)}
-                      disabled={bookingLoading === freelancer.id}
-                      className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-2 px-3 rounded-lg transition-colors text-sm"
-                    >
-                      {bookingLoading === freelancer.id ? 'Booking...' : 'Quick Book'}
-                    </button>
-                    <Link
-                      to={`/client/freelancer/${freelancer.id}`}
-                      state={{ freelancer }}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-colors text-sm text-center"
-                    >
-                      View Profile
-                    </Link>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-green-600 font-medium">Hourly Rate</span>
+                        <span className="text-lg font-bold text-green-600">{freelancer.price}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleQuickBook(freelancer)}
+                        disabled={bookingLoading === freelancer._id}
+                        className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-2 px-3 rounded-lg transition-colors text-sm"
+                      >
+                        {bookingLoading === freelancer._id ? 'Booking...' : 'Quick Book'}
+                      </button>
+                      <Link
+                        to={`/client/freelancer/${freelancer._id}`}
+                        state={{ freelancer }}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-colors text-sm text-center"
+                      >
+                        View Profile
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {freelancers.length > 24 && (

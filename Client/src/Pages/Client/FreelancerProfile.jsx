@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import axios from "axios";
@@ -13,10 +12,10 @@ gsap.registerPlugin(ScrollTrigger);
 export default function FreelancerProfile() {
   const { id } = useParams();
   const location = useLocation();
-  const navigate = useNavigate();
   const freelancer = location.state?.freelancer;
   const from = location.state?.from;
-  const [loading, setLoading] = useState(false);
+  const [freelancerData, setFreelancerData] = useState(freelancer || null);
+  const [dataLoading, setDataLoading] = useState(!freelancer);
   const pageVariants = {
     initial: { opacity: 0, y: 20 },
     in: { opacity: 1, y: 0 },
@@ -81,6 +80,31 @@ export default function FreelancerProfile() {
     "Manoj Agarwal", "Karan Singh", "Vivek Rao", "Rohit Mehta", "Ajay Gupta"
   ];
 
+  // Fetch freelancer data from API if not provided via state
+  useEffect(() => {
+    const fetchFreelancer = async () => {
+      if (!freelancer && id) {
+        try {
+          setDataLoading(true);
+          const response = await axios.get(`/api/freelancers/${id}`);
+          const freelancer = response.data;
+          if (freelancer.services && !Array.isArray(freelancer.services)) {
+            freelancer.services = Object.values(freelancer.services);
+          }
+          setFreelancerData(freelancer);
+        } catch (error) {
+          console.error('Error fetching freelancer:', error);
+          // Fallback to generated data if API fails
+          setFreelancerData(generateFreelancer(parseInt(id)));
+        } finally {
+          setDataLoading(false);
+        }
+      }
+    };
+
+    fetchFreelancer();
+  }, [freelancer, id]);
+
   const generateFreelancer = (freelancerId) => {
     const service = services[Math.floor(Math.random() * services.length)];
     const name = names[Math.floor(Math.random() * names.length)];
@@ -98,8 +122,8 @@ export default function FreelancerProfile() {
     return {
       id: freelancerId,
       name,
-      service,
-      location,
+      services: [service],
+      address: location,
       rating: parseFloat(rating),
       reviews,
       price,
@@ -118,8 +142,6 @@ export default function FreelancerProfile() {
       responseTime: "< 2 hours"
     };
   };
-
-  const freelancerData = freelancer || generateFreelancer(parseInt(id));
 
   const generateReviews = () => {
     const reviewTexts = [
@@ -141,64 +163,7 @@ export default function FreelancerProfile() {
 
   const reviews = generateReviews();
 
-  const handleBooking = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      Swal.fire({
-        title: 'Login Required',
-        text: 'Please login to book a service',
-        icon: 'warning',
-        confirmButtonText: 'Login'
-      }).then(() => {
-        navigate('/login');
-      });
-      return;
-    }
 
-    setLoading(true);
-    try {
-      console.log('Attempting to book freelancer with ID:', freelancerData.id);
-      const response = await axios.post('/api/bookings', {
-        freelancerId: freelancerData.id.toString(),
-        freelancerName: freelancerData.name,
-        service: freelancerData.service,
-        date: new Date().toISOString().split('T')[0], // Today's date as default
-        time: '10:00 AM', // Default time
-        location: freelancerData.location,
-        price: freelancerData.price,
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      console.log('Booking response:', response.data);
-      Swal.fire({
-        title: 'Booking Successful!',
-        text: 'Your booking has been created successfully',
-        icon: 'success',
-        confirmButtonText: 'View My Bookings'
-      }).then(() => {
-        if (from === 'browse') {
-          navigate('/client/browse');
-        } else {
-          navigate('/client/bookings');
-        }
-      });
-    } catch (error) {
-      console.error('Booking error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      Swal.fire({
-        title: 'Booking Failed',
-        text: error.response?.data?.message || error.response?.data?.error || 'Something went wrong',
-        icon: 'error',
-        confirmButtonText: 'Try Again'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     // Scroll to top when component mounts
@@ -313,20 +278,27 @@ export default function FreelancerProfile() {
         ref={profileRef}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16"
       >
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="p-8">
-            <div className="flex flex-col md:flex-row items-start md:items-center mb-8">
-              <img
-                src={freelancerData.image}
-                alt={freelancerData.name}
-                className="w-32 h-32 rounded-full object-cover mb-4 md:mb-0 md:mr-8"
-              />
+        {dataLoading ? (
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="p-8 text-center">
+              <p className="text-xl text-gray-600">Loading freelancer profile...</p>
+            </div>
+          </div>
+        ) : freelancerData ? (
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="p-8">
+              <div className="flex flex-col md:flex-row items-start md:items-center mb-8">
+                <img
+                  src={freelancerData.image}
+                  alt={freelancerData.name}
+                  className="w-32 h-32 rounded-full object-cover mb-4 md:mb-0 md:mr-8"
+                />
               <div className="flex-1">
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
                   {freelancerData.name}
                 </h2>
                 <p className="text-xl text-gray-600 font-semibold mb-2">
-                  {freelancerData.service}
+                  {freelancerData.services && freelancerData.services.length > 0 ? (typeof freelancerData.services[0] === 'string' ? freelancerData.services[0] : freelancerData.services[0].name) : "No service"}
                 </p>
                 <p className="text-gray-500 mb-4">{freelancerData.location}</p>
 
@@ -369,6 +341,7 @@ export default function FreelancerProfile() {
                 </div>
               </div>
             </div>
+          </div>
 
             <div className="mb-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">About</h3>
@@ -390,19 +363,25 @@ export default function FreelancerProfile() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={handleBooking}
-                disabled={loading}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+              <Link
+                to={`/client/book/${freelancerData.id}`}
+                state={{ freelancer: freelancerData, from: 'profile' }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
               >
-                {loading ? 'Booking...' : 'Book Now'}
-              </button>
+                Book Now
+              </Link>
               <button className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors">
                 Contact Freelancer
               </button>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="p-8 text-center">
+              <p className="text-xl text-gray-600">Freelancer not found.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Reviews Section */}

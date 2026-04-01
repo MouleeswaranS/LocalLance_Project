@@ -1,34 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import axios from "axios";
-import Swal from "sweetalert2";
 import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function BrowseFreelancers() {
-  const pageVariants = {
-    initial: { opacity: 0, y: 20 },
-    in: { opacity: 1, y: 0 },
-    out: { opacity: 0, y: -20 }
-  };
-
-  const pageTransition = {
-    type: "tween",
-    ease: "anticipate",
-    duration: 0.8
-  };
-
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedService, setSelectedService] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 24;
-  const [bookingLoading, setBookingLoading] = useState(null);
 
   // Get service from URL query parameter
   useEffect(() => {
@@ -43,6 +28,7 @@ export default function BrowseFreelancers() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedService, selectedLocation]);
+
   const heroRef = useRef(null);
   const titleRef = useRef(null);
   const searchRef = useRef(null);
@@ -63,83 +49,55 @@ export default function BrowseFreelancers() {
     "Electronics & Gadgets"
   ];
 
-  const locations = [
-    "Delhi",
-    "Mumbai",
-    "Bangalore",
-    "Ahmedabad",
-    "Pune",
-    "Chennai",
-    "Hyderabad",
-    "Kolkata",
-    "Jaipur",
-    "Surat"
-  ];
+  const [freelancers, setFreelancers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const generateFreelancers = () => {
-    const freelancerList = [];
-    let id = 1;
+  // Fetch freelancers from API
+  useEffect(() => {
+    const fetchFreelancers = async () => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (selectedService) params.append('service', selectedService);
+        if (selectedLocation) params.append('location', selectedLocation);
+        params.append('limit', '200'); // Fetch more for pagination
 
-    const names = [
-      "Rajesh Kumar", "Priya Sharma", "Amit Singh", "Sneha Patel", "Vikram Rao",
-      "Kavita Jain", "Arjun Mehta", "Meera Joshi", "Ravi Gupta", "Anjali Verma",
-      "Suresh Reddy", "Nisha Agarwal", "Deepak Sharma", "Poonam Singh", "Manoj Yadav",
-      "Rekha Nair", "Karan Kapoor", "Sunita Roy", "Vivek Tiwari", "Alisha Khan",
-      "Rohit Das", "Neha Saxena", "Ajay Kumar", "Kiran Bhatia", "Sanjay Mishra",
-      "Priyanka Choudhury", "Rahul Jain", "Shweta Gupta", "Ankit Sharma", "Divya Patel",
-      "Ravi Sharma", "Kavita Singh", "Arjun Patel", "Meera Rao", "Ravi Jain",
-      "Anjali Mehta", "Suresh Joshi", "Nisha Gupta", "Deepak Verma", "Poonam Reddy",
-      "Manoj Agarwal", "Rekha Sharma", "Karan Singh", "Sunita Patel", "Vivek Rao",
-      "Alisha Jain", "Rohit Mehta", "Neha Joshi", "Ajay Gupta", "Kiran Verma"
-    ];
-
-    const maleNames = [
-      "Rajesh Kumar", "Amit Singh", "Vikram Rao", "Arjun Mehta", "Ravi Gupta",
-      "Suresh Reddy", "Deepak Sharma", "Manoj Yadav", "Karan Kapoor", "Vivek Tiwari",
-      "Rohit Das", "Ajay Kumar", "Sanjay Mishra", "Rahul Jain", "Ankit Sharma",
-      "Ravi Sharma", "Arjun Patel", "Ravi Jain", "Suresh Joshi", "Deepak Verma",
-      "Manoj Agarwal", "Karan Singh", "Vivek Rao", "Rohit Mehta", "Ajay Gupta"
-    ];
-
-    locations.forEach(location => {
-      for (let i = 0; i < 20; i++) {
-        const service = services[Math.floor(Math.random() * services.length)];
-        const name = names[Math.floor(Math.random() * names.length)];
-        const gender = maleNames.includes(name) ? 'men' : 'women';
-        const rating = (4.0 + Math.random() * 1.0).toFixed(1);
-        const reviews = Math.floor(Math.random() * 300) + 50;
-        const price = `₹${200 + Math.floor(Math.random() * 300)}/hr`;
-        const experienceYears = 3 + Math.floor(Math.random() * 8);
-        const experience = `${experienceYears} years`;
-        const completedJobs = Math.floor(Math.random() * 800) + 100;
-        const imageNumber = Math.floor(Math.random() * 99) + 1;
-        const image = `https://randomuser.me/api/portraits/${gender}/${imageNumber}.jpg`;
-
-        freelancerList.push({
-          id: id++,
-          name,
-          service,
-          location,
-          rating: parseFloat(rating),
-          reviews,
-          price,
-          image,
-          experience,
-          completedJobs
+        const response = await axios.get(`/api/freelancers?${params.toString()}`);
+        const normalizedFreelancers = response.data.map(freelancer => {
+          if (freelancer.services && !Array.isArray(freelancer.services)) {
+            freelancer.services = Object.values(freelancer.services);
+          }
+          return freelancer;
         });
+        setFreelancers(normalizedFreelancers);
+      } catch (error) {
+        console.error('Error fetching freelancers:', error);
+        // Fallback to empty array if API fails
+        setFreelancers([]);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
 
-    return freelancerList;
-  };
-
-  const freelancers = generateFreelancers();
+    fetchFreelancers();
+  }, [selectedService, selectedLocation]);
 
   const filteredFreelancers = freelancers.filter(freelancer => {
-    const matchesSearch = freelancer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         freelancer.service.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesService = selectedService === "" || freelancer.service === selectedService;
-    const matchesLocation = selectedLocation === "" || freelancer.location === selectedLocation;
+    const matchesSearch = searchTerm === "" ||
+      freelancer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (freelancer.services && freelancer.services.some(s => {
+        const sName = typeof s === 'string' ? s : s?.name;
+        return sName?.toLowerCase().includes(searchTerm.toLowerCase());
+      }));
+
+    const matchesService = selectedService === "" ||
+      (freelancer.services && freelancer.services.some(s => {
+        const sName = typeof s === 'string' ? s : s?.name;
+        return sName === selectedService;
+      }));
+
+    const matchesLocation = selectedLocation === "" || freelancer.address === selectedLocation;
+
     return matchesSearch && matchesService && matchesLocation;
   });
 
@@ -151,117 +109,6 @@ export default function BrowseFreelancers() {
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: freelancersRef.current.offsetTop - 100, behavior: 'smooth' });
-  };
-
-  const handleQuickBook = async (freelancer) => {
-    setBookingLoading(freelancer.id);
-
-    const { value: date } = await Swal.fire({
-      title: 'Select Date',
-      input: 'date',
-      inputLabel: 'Choose a date for the service',
-      inputPlaceholder: 'Select date',
-      showCancelButton: true,
-      inputValidator: (value) => {
-        if (!value) {
-          return 'You need to select a date!';
-        }
-        const selectedDate = new Date(value);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (selectedDate < today) {
-          return 'Please select a future date!';
-        }
-      }
-    });
-
-    if (!date) {
-      setBookingLoading(null);
-      return;
-    }
-
-    const { value: time } = await Swal.fire({
-      title: 'Select Time',
-      input: 'select',
-      inputOptions: {
-        '9:00 AM': '9:00 AM',
-        '10:00 AM': '10:00 AM',
-        '11:00 AM': '11:00 AM',
-        '12:00 PM': '12:00 PM',
-        '1:00 PM': '1:00 PM',
-        '2:00 PM': '2:00 PM',
-        '3:00 PM': '3:00 PM',
-        '4:00 PM': '4:00 PM',
-        '5:00 PM': '5:00 PM',
-        '6:00 PM': '6:00 PM'
-      },
-      inputPlaceholder: 'Select time',
-      showCancelButton: true,
-      inputValidator: (value) => {
-        if (!value) {
-          return 'You need to select a time!';
-        }
-      }
-    });
-
-    if (!time) {
-      setBookingLoading(null);
-      return;
-    }
-
-    const { value: location } = await Swal.fire({
-      title: 'Service Location',
-      input: 'text',
-      inputLabel: 'Enter the service location',
-      inputPlaceholder: 'e.g., Home address, Office address',
-      showCancelButton: true,
-      inputValidator: (value) => {
-        if (!value) {
-          return 'You need to enter a location!';
-        }
-      }
-    });
-
-    if (!location) {
-      setBookingLoading(null);
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post('/api/bookings', {
-        freelancerId: freelancer.id.toString(),
-        freelancerName: freelancer.name,
-        service: freelancer.service,
-        date,
-        time,
-        location,
-        price: freelancer.price
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setBookingLoading(null);
-      Swal.fire({
-        title: 'Success!',
-        text: 'Your booking has been created successfully',
-        icon: 'success',
-        confirmButtonText: 'View My Bookings'
-      }).then(() => {
-        window.location.href = '/client/bookings';
-      });
-    } catch (error) {
-      setBookingLoading(null);
-      console.error('Booking error:', error);
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to create booking. Please try again.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
-    }
   };
 
   useEffect(() => {
@@ -341,12 +188,7 @@ export default function BrowseFreelancers() {
   }, [currentPage, searchTerm, selectedService, selectedLocation]); // Re-run animations when page or filters change
 
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
+    <div
       className="min-h-screen bg-gray-50"
     >
       <Navbar role="client" />
@@ -429,65 +271,79 @@ export default function BrowseFreelancers() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {currentFreelancers.map((freelancer, index) => (
-            <div
-              key={freelancer.id}
-              ref={(el) => (freelancerCardsRef.current[index] = el)}
-              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
-            >
-              <div className="p-6">
-                <div className="flex items-center mb-4">
-                  <img
-                    src={freelancer.image}
-                    alt={freelancer.name}
-                    loading="lazy"
-                    className="w-16 h-16 rounded-full object-cover mr-4"
-                  />
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      {freelancer.name}
-                    </h3>
-                    <p className="text-gray-600 font-bold">{freelancer.service}</p>
-                    <p className="text-sm text-gray-500">{freelancer.location}</p>
+          {loading ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-xl text-gray-600">Loading freelancers...</p>
+            </div>
+          ) : filteredFreelancers.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-xl text-gray-600">No freelancers found matching your criteria.</p>
+              <p className="text-gray-500 mt-2">Try adjusting your search or filters.</p>
+            </div>
+          ) : (
+            currentFreelancers.map((freelancer, index) => (
+              <div
+                key={freelancer._id}
+                ref={(el) => (freelancerCardsRef.current[index] = el)}
+                className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+              >
+                <div className="p-6">
+                  <div className="flex items-center mb-4">
+                    <img
+                      src={freelancer.image}
+                      alt={freelancer.name}
+                      loading="lazy"
+                      className="w-16 h-16 rounded-full object-cover mr-4"
+                    />
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {freelancer.name}
+                      </h3>
+                      <p className="text-gray-600 font-bold">
+                        {freelancer.services && freelancer.services[0] 
+                          ? (typeof freelancer.services[0] === 'string' ? freelancer.services[0] : freelancer.services[0].name)
+                          : 'No service'}
+                      </p>
+                      <p className="text-sm text-gray-500">{freelancer.address}</p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center">
-                    <span className="text-yellow-400 text-lg">⭐</span>
-                    <span className="ml-1 text-gray-700 font-medium">
-                      {freelancer.rating}
-                    </span>
-                    <span className="ml-1 text-gray-500 text-sm">
-                      ({freelancer.reviews})
-                    </span>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <span className="text-yellow-400 text-lg">⭐</span>
+                      <span className="ml-1 text-gray-700 font-medium">
+                        {freelancer.rating}
+                      </span>
+                      <span className="ml-1 text-gray-500 text-sm">
+                        ({freelancer.reviews})
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex justify-between text-sm text-gray-600 mb-4">
-                  <span>Experience: {freelancer.experience}</span>
-                  <span>Jobs: {freelancer.completedJobs}</span>
-                </div>
+                  <div className="flex justify-between text-sm text-gray-600 mb-4">
+                    <span>Experience: {freelancer.experience}</span>
+                    <span>Jobs: {freelancer.completedJobs}</span>
+                  </div>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleQuickBook(freelancer)}
-                    disabled={bookingLoading === freelancer.id}
-                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors text-center"
-                  >
-                    {bookingLoading === freelancer.id ? 'Booking...' : 'Quick Book'}
-                  </button>
-                  <Link
-                    to={`/client/freelancer/${freelancer.id}`}
-                    state={{ freelancer, from: 'browse' }}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors text-center block"
-                  >
-                    View Profile
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link
+                      to={`/client/book/${freelancer._id}`}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors text-center block"
+                    >
+                      Book Now
+                    </Link>
+                    <Link
+                      to={`/client/freelancer/${freelancer._id}`}
+                      state={{ freelancer, from: 'browse' }}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors text-center block"
+                    >
+                      View Profile
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {filteredFreelancers.length === 0 && (
@@ -532,6 +388,6 @@ export default function BrowseFreelancers() {
       </div>
 
       <Footer />
-    </motion.div>
+    </div>
   );
 }

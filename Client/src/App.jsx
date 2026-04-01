@@ -11,6 +11,11 @@ import PopularService from "./Pages/Client/PopularService";
 import FreelancerProfile from "./Pages/Client/FreelancerProfile";
 import MyBookings from "./Pages/Client/MyBookings";
 import FreelancerDashboard from "./Pages/Freelancer/FreelancerDashboard";
+import FreelancerBookings from "./Pages/Freelancer/FreelancerBookings";
+import MyServices from "./Pages/Freelancer/MyServices";
+
+// ✅ Added missing import
+import BookFreelancer from "./Pages/Client/BookFreelancer";
 
 export default function App() {
   return (
@@ -31,8 +36,13 @@ export default function App() {
           <Route path="/client/freelancer/:id" element={<FreelancerProfile />} />
           <Route path="/client/bookings" element={<MyBookings />} />
 
+          {/* ✅ Missing booking route added */}
+          <Route path="/client/book/:id" element={<BookFreelancer />} />
+
           {/* Freelancer */}
           <Route path="/freelancer/dashboard" element={<FreelancerDashboard />} />
+          <Route path="/freelancer/services" element={<MyServices />} />
+          <Route path="/freelancer/bookings" element={<FreelancerBookings />} />
         </Routes>
       </AnimatePresence>
     </BrowserRouter>

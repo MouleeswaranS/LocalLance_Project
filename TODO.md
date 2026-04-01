@@ -1,0 +1,3 @@
+- [ ] Add bookingLoading state to ClientDashboard.jsx
+- [ ] Improve navigation handling to prevent blank page on back/forward
+- [ ] Test navigation functionality

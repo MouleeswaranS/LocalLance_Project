@@ -83,7 +83,7 @@ export default function MyBookings() {
       if (newTime) {
         try {
           const token = localStorage.getItem('token');
-          await axios.put(`/api/bookings/${bookingId}`, {
+          await axios.put(`/api/bookings/update/${bookingId}`, {
             date: newDate,
             time: newTime,
             status: 'confirmed'
@@ -100,7 +100,7 @@ export default function MyBookings() {
             confirmButtonText: 'OK'
           });
 
-          fetchBookings(); // Refresh the bookings list
+          fetchBookings(); 
         } catch (error) {
           console.error('Error rescheduling booking:', error);
           Swal.fire({
@@ -128,7 +128,7 @@ export default function MyBookings() {
     if (result.isConfirmed) {
       try {
         const token = localStorage.getItem('token');
-        await axios.put(`/api/bookings/${bookingId}`, {
+        await axios.put(`/api/bookings/update/${bookingId}`, {
           status: 'cancelled'
         }, {
           headers: {
@@ -143,7 +143,7 @@ export default function MyBookings() {
           confirmButtonText: 'OK'
         });
 
-        fetchBookings(); // Refresh the bookings list
+        fetchBookings();
       } catch (error) {
         console.error('Error cancelling booking:', error);
         Swal.fire({
@@ -164,7 +164,7 @@ export default function MyBookings() {
     }
 
     try {
-      const response = await axios.get('/api/bookings', {
+      const response = await axios.get('/api/bookings/client', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -184,10 +184,18 @@ export default function MyBookings() {
           service: booking.service,
           date: booking.date,
           time: booking.time,
+
+          // ⭐ FIXED LINE — previously booking.address (WRONG)
           location: booking.location,
+
           status: booking.status,
           price: booking.price,
-          image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" // Default image
+
+          // ⭐ FIXED (avoid undefined)
+          rating: booking.rating || 0,
+          review: booking.review || "",
+
+          image: booking.freelancerImage,
         };
 
         if (booking.status === 'pending' || booking.status === 'confirmed') {
@@ -215,11 +223,8 @@ export default function MyBookings() {
 
   useEffect(() => {
     fetchBookings();
-
-    // Scroll to top when component mounts
     window.scrollTo(0, 0);
 
-    // Smooth and faster entry animations
     const entryTl = gsap.timeline();
 
     gsap.set(titleRef.current, {
@@ -240,7 +245,6 @@ export default function MyBookings() {
       ease: "power2.out",
     });
 
-    // Scroll-triggered animations for bookings (single column: from left)
     bookingCardsRef.current.filter(Boolean).forEach((card, index) => {
       gsap.set(card, {
         opacity: 0,
@@ -304,27 +308,24 @@ export default function MyBookings() {
         <div className="absolute inset-0">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-3xl opacity-20"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-r from-indigo-500 to-purple-700 rounded-full blur-3xl opacity-20"></div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1
-              ref={titleRef}
-              className="text-4xl md:text-5xl font-bold mb-4"
-            >
-              My Bookings
-            </h1>
-            <p className="text-xl mb-8 text-blue-100">
-              Manage your upcoming and past service bookings
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto text-center px-4">
+          <h1
+            ref={titleRef}
+            className="text-4xl md:text-5xl font-bold mb-4"
+          >
+            My Bookings
+          </h1>
+          <p className="text-xl mb-8 text-blue-100">
+            Manage your upcoming and past service bookings
+          </p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-lg shadow-md p-1">
+          <div className="bg-white rounded-lg shadow-md p-1 flex">
             <button
               onClick={() => setActiveTab("upcoming")}
               className={`px-6 py-3 rounded-md font-semibold transition-colors ${
@@ -359,10 +360,7 @@ export default function MyBookings() {
         </div>
 
         {/* Bookings List */}
-        <div
-          ref={bookingsRef}
-          className="space-y-6"
-        >
+        <div ref={bookingsRef} className="space-y-6">
           {loading ? (
             <div className="text-center py-12">
               <p className="text-xl text-gray-600">Loading bookings...</p>
@@ -409,33 +407,42 @@ export default function MyBookings() {
                         </span>
                       </div>
 
+                      {/* ⭐ UPCOMING ACTIONS */}
                       {activeTab === "upcoming" && (
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleReschedule(booking.id)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
                           >
                             Reschedule
                           </button>
                           <button
                             onClick={() => handleCancel(booking.id)}
-                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold"
                           >
                             Cancel
                           </button>
                         </div>
                       )}
 
+                      {/* ⭐ COMPLETED SECTION */}
                       {activeTab === "completed" && (
                         <div className="text-center">
                           <p className="text-sm text-gray-500 mb-1">Your Rating</p>
+
+                          {/* ⭐ FIXED (avoid undefined) */}
                           <div className="flex justify-center">
-                            {renderStars(booking.rating)}
+                            {renderStars(booking.rating || 0)}
                           </div>
-                          <p className="text-sm text-gray-600 mt-2 italic">"{booking.review}"</p>
+
+                          <p className="text-sm text-gray-600 mt-2 italic">
+                            "{booking.review || ""}"
+                          </p>
+
                         </div>
                       )}
 
+                      {/* ⭐ CANCELLED SECTION */}
                       {activeTab === "cancelled" && (
                         <div className="text-center">
                           <p className="text-sm text-gray-500">Reason</p>
@@ -449,13 +456,13 @@ export default function MyBookings() {
             ))
           )}
 
-          {bookings[activeTab].length === 0 && (
+          {bookings[activeTab].length === 0 && !loading && (
             <div className="text-center py-12">
               <p className="text-xl text-gray-600">No {activeTab} bookings found.</p>
               {activeTab === "upcoming" && (
                 <Link
                   to="/client/browse"
-                  className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                  className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg"
                 >
                   Browse Freelancers
                 </Link>

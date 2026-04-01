@@ -20,7 +20,12 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/freelancers', require('./routes/freelancers'));
 app.use('/api/bookings', require('./routes/bookings'));
+
+
+
+
 
 app.get('/', (req, res) => {
   res.send('Server is running');

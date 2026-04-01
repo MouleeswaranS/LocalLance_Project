@@ -1,14 +1,14 @@
-# TODO: Fix Booking Functionality in PopularService and Dashboard Sections
+# TODO: Fix Freelancer Booking and White Page Issues
 
-## Tasks
-- [x] Update Booking model to include freelancerName field and change freelancerId to string
-- [x] Modify booking creation in FreelancerProfile.jsx to send freelancerName
-- [x] Update bookings route to handle string freelancerId and save freelancerName
-- [x] Update MyBookings.jsx to display freelancerName instead of populated name
-- [ ] Test booking from PopularService page
-- [ ] Test booking from Dashboard "More Services for You" section
-- [ ] Verify bookings appear in MyBookings page
+## Steps to Complete
 
-## Notes
-- Current issue: Freelancers are generated on frontend with numeric IDs, but backend expects ObjectId refs to User model.
-- Solution: Store freelancer details directly in booking without requiring real user accounts for demo purposes.
+- [ ] Update Server/seedFreelancers.js: Change 'service' to 'services' array and 'location' to 'address'
+- [ ] Update Client/src/Pages/Client/BrowseFreelancers.jsx: Use freelancer.services[0] and freelancer.address in booking and display
+- [ ] Update Client/src/Pages/Client/PopularService.jsx: Add useNavigate import, fix service.name handling to prevent white page
+- [ ] Update Server/routes/bookings.js: Ensure proper freelancerId ObjectId conversion
+- [ ] Run seed script to update database with corrected freelancer data
+- [ ] Test booking functionality from client dashboard - ensure no "booking failed" after date/time/address input
+- [ ] Test PopularService page navigation - ensure no white page on click
+- [ ] Test "More for You" section navigation - ensure no white page
+- [ ] Verify bookings are stored in MongoDB correctly with proper freelancer details
+- [ ] Test previous page navigation - ensure no white pages on back/forward

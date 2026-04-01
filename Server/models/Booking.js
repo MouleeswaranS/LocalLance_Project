@@ -7,12 +7,17 @@ const bookingSchema = new mongoose.Schema({
     required: true,
   },
   freelancerId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Freelancer',
     required: true,
   },
   freelancerName: {
     type: String,
     required: true,
+  },
+  freelancerImage: {   // ✅ ADD THIS
+    type: String,
+    required: false,
   },
   service: {
     type: String,
