@@ -57,7 +57,8 @@ export default function MyServices() {
 
     try {
       // Fetch freelancer profile using the "me" endpoint
-      const response = await axios.get(`/api/freelancers/profile/me`, {
+      const response = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/freelancers/profile/me`,{
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -121,7 +122,10 @@ export default function MyServices() {
         experience: newService.experience // Update experience at profile level
       };
 
-      await axios.put(`/api/freelancers/profile/me`, payload, {
+      await axios.put(
+  `${import.meta.env.VITE_API_URL}/api/freelancers/profile/me`,
+  payload,
+  {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -168,7 +172,9 @@ export default function MyServices() {
         return s;
       });
 
-      await axios.put(`/api/freelancers/profile/me`, { 
+      await axios.put(
+  `${import.meta.env.VITE_API_URL}/api/freelancers/profile/me`,
+  {
         services: updatedServices,
         experience: newService.experience // Update experience at profile level
       }, {
@@ -209,7 +215,8 @@ export default function MyServices() {
 
         const updatedServices = services.filter(s => s !== serviceToDelete && s._id !== serviceToDelete._id);
 
-        await axios.put(`/api/freelancers/profile/me`, { services: updatedServices }, {
+        await axios.put(
+  `${import.meta.env.VITE_API_URL}/api/freelancers/profile/me`, { services: updatedServices }, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -292,45 +299,45 @@ export default function MyServices() {
       {/* Hero Section */}
       <div
         ref={heroRef}
-        className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-24 relative overflow-hidden"
+        className="relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 py-24 text-white"
       >
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full blur-3xl opacity-20"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 opacity-20 blur-3xl"></div>
+          <div className="absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 opacity-20 blur-3xl"></div>
         </div>
-        <div className="max-w-7xl mx-auto text-center px-4">
+        <div className="mx-auto max-w-7xl px-4 text-center">
           <h1
             ref={titleRef}
-            className="text-4xl md:text-5xl font-bold mb-4"
+            className="mb-4 text-4xl font-bold md:text-5xl"
           >
             My Services
           </h1>
-          <p className="text-xl mb-8 text-purple-100">
+          <p className="mb-8 text-xl text-purple-100">
             Manage your service offerings and pricing
           </p>
         </div>
       </div>
 
       {/* Add/Edit Service Form */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900">
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        <div className="mb-8 rounded-xl bg-white p-6 shadow-lg">
+          <h2 className="mb-6 text-2xl font-bold text-gray-900">
             {editingService ? 'Edit Service' : 'Add New Service'}
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <input
               type="text"
               placeholder="Service Name"
               value={newService.name}
               onChange={(e) => setNewService({ ...newService, name: e.target.value })}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"
             />
 
             <select
               value={newService.category}
               onChange={(e) => setNewService({ ...newService, category: e.target.value })}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"
             >
               <option value="">Select Category</option>
               {categories.map(category => (
@@ -343,7 +350,7 @@ export default function MyServices() {
               placeholder="Price (e.g., ₹299)"
               value={newService.price}
               onChange={(e) => setNewService({ ...newService, price: e.target.value })}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"
             />
             
             <input
@@ -351,7 +358,7 @@ export default function MyServices() {
               placeholder="Experience (e.g., 5 years)"
               value={newService.experience || ''}
               onChange={(e) => setNewService({ ...newService, experience: e.target.value })}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"
             />
 
             <div className="md:col-span-2">
@@ -360,7 +367,7 @@ export default function MyServices() {
                 value={newService.description}
                 onChange={(e) => setNewService({ ...newService, description: e.target.value })}
                 rows={3}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none"
               />
             </div>
           </div>
@@ -368,7 +375,7 @@ export default function MyServices() {
           <div className="flex gap-4">
             <button
               onClick={editingService ? handleUpdateService : handleAddService}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="rounded-lg bg-purple-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-purple-700"
             >
               {editingService ? 'Update Service' : 'Add Service'}
             </button>
@@ -379,7 +386,7 @@ export default function MyServices() {
                   setEditingService(null);
                   setNewService({ name: '', description: '', price: '', category: '' });
                 }}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                className="rounded-lg bg-gray-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-gray-700"
               >
                 Cancel
               </button>
@@ -390,34 +397,34 @@ export default function MyServices() {
         {/* Services List */}
         <div ref={servicesRef} className="space-y-6">
           {loading ? (
-            <div className="text-center py-12">
+            <div className="py-12 text-center">
               <p className="text-xl text-gray-600">Loading services...</p>
             </div>
           ) : services.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="py-12 text-center">
               <p className="text-xl text-gray-600">No services added yet.</p>
-              <p className="text-gray-500 mt-2">Add your first service above to get started.</p>
+              <p className="mt-2 text-gray-500">Add your first service above to get started.</p>
             </div>
           ) : (
             services.map((service, index) => (
               <div
                 key={service._id || index}
                 ref={(el) => (serviceCardsRef.current[index] = el)}
-                className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                className="overflow-hidden rounded-xl bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
               >
                 <div className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between">
+                  <div className="flex flex-col justify-between md:flex-row md:items-center">
                     <div className="flex-1">
-                      <div className="flex items-center gap-4 mb-2">
+                      <div className="mb-2 flex items-center gap-4">
                         <h3 className="text-xl font-semibold text-gray-900">
                           {service.name}
                         </h3>
-                        <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                        <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">
                           {service.category}
                         </span>
                       </div>
 
-                      <p className="text-gray-600 mb-3">{service.description}</p>
+                      <p className="mb-3 text-gray-600">{service.description}</p>
 
                       <div className="flex items-center gap-6 text-sm text-gray-500">
                         <span>Price: <strong className="text-green-600">{service.price}</strong></span>
@@ -426,16 +433,16 @@ export default function MyServices() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2 mt-4 md:mt-0">
+                    <div className="mt-4 flex gap-2 md:mt-0">
                       <button
                         onClick={() => handleEditService(service)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+                        className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeleteService(service)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+                        className="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-700"
                       >
                         Delete
                       </button>

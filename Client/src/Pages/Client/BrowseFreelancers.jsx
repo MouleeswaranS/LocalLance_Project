@@ -62,7 +62,9 @@ export default function BrowseFreelancers() {
         if (selectedLocation) params.append('location', selectedLocation);
         params.append('limit', '200'); // Fetch more for pagination
 
-        const response = await axios.get(`/api/freelancers?${params.toString()}`);
+        const response = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/freelancers?${params.toString()}`
+);
         const normalizedFreelancers = response.data.map(freelancer => {
           if (freelancer.services && !Array.isArray(freelancer.services)) {
             freelancer.services = Object.values(freelancer.services);

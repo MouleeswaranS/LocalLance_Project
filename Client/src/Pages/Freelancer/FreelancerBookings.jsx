@@ -16,7 +16,7 @@ export default function FreelancerBookings() {
       if (!token) return;
 
       const response = await axios.get(
-        `/api/bookings/freelancer/my-bookings`,
+  `${import.meta.env.VITE_API_URL}/api/bookings/freelancer/my-bookings`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -34,7 +34,7 @@ export default function FreelancerBookings() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `/api/bookings/update/${bookingId}`,
+  `${import.meta.env.VITE_API_URL}/api/bookings/update/${bookingId}`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -84,35 +84,35 @@ export default function FreelancerBookings() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="flex min-h-screen flex-col bg-gray-50">
       <Navbar role="freelancer" />
-      <div className="flex-grow max-w-7xl mx-auto w-full px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 text-gray-800">My Bookings</h1>
+      <div className="mx-auto w-full max-w-7xl flex-grow px-4 py-8">
+        <h1 className="mb-8 text-3xl font-bold text-gray-800">My Bookings</h1>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-500">Loading bookings...</div>
+          <div className="py-12 text-center text-gray-500">Loading bookings...</div>
         ) : bookings.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg shadow">
+          <div className="rounded-lg bg-white py-12 text-center shadow">
             <p className="text-xl text-gray-600">No bookings found.</p>
           </div>
         ) : (
-          <div className="bg-white shadow rounded-lg overflow-hidden">
+          <div className="overflow-hidden rounded-lg bg-white shadow">
              {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-100 text-gray-700 uppercase text-sm">
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full border-collapse text-left">
+                <thead className="bg-gray-100 text-sm text-gray-700 uppercase">
                   <tr>
-                    <th className="p-4 border-b">Client</th>
-                    <th className="p-4 border-b">Service</th>
-                    <th className="p-4 border-b">Date & Time</th>
-                    <th className="p-4 border-b">Price</th>
-                    <th className="p-4 border-b">Status</th>
-                    <th className="p-4 border-b text-center">Actions</th>
+                    <th className="border-b p-4">Client</th>
+                    <th className="border-b p-4">Service</th>
+                    <th className="border-b p-4">Date & Time</th>
+                    <th className="border-b p-4">Price</th>
+                    <th className="border-b p-4">Status</th>
+                    <th className="border-b p-4 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody ref={containerRef} className="text-gray-700">
                   {bookings.map((booking) => (
-                    <tr key={booking._id} className="hover:bg-gray-50 border-b last:border-0 transition-colors">
+                    <tr key={booking._id} className="border-b transition-colors last:border-0 hover:bg-gray-50">
                       <td className="p-4">
                         <div className="font-semibold">{booking.clientId?.name || booking.clientName || "Client"}</div>
                         <div className="text-xs text-gray-500">{booking.clientId?.email}</div>
@@ -130,13 +130,13 @@ export default function FreelancerBookings() {
                             <>
                               <button
                                 onClick={() => handleStatusUpdate(booking._id, "confirmed")}
-                                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition"
+                                className="rounded bg-green-500 px-3 py-1 text-sm text-white transition hover:bg-green-600"
                               >
                                 Accept
                               </button>
                               <button
                                 onClick={() => handleStatusUpdate(booking._id, "cancelled")}
-                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition"
+                                className="rounded bg-red-500 px-3 py-1 text-sm text-white transition hover:bg-red-600"
                               >
                                 Reject
                               </button>
@@ -145,13 +145,13 @@ export default function FreelancerBookings() {
                           {booking.status === "confirmed" && (
                              <button
                                onClick={() => handleStatusUpdate(booking._id, "completed")}
-                               className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition"
+                               className="rounded bg-blue-500 px-3 py-1 text-sm text-white transition hover:bg-blue-600"
                              >
                                Mark Complete
                              </button>
                           )}
                           {(booking.status === "completed" || booking.status === "cancelled") && (
-                            <span className="text-gray-400 text-sm italic">No actions</span>
+                            <span className="text-sm text-gray-400 italic">No actions</span>
                           )}
                         </div>
                       </td>
@@ -162,32 +162,32 @@ export default function FreelancerBookings() {
             </div>
 
             {/* Mobile Cards */}
-            <div className="md:hidden p-4 space-y-4">
+            <div className="space-y-4 p-4 md:hidden">
                 {bookings.map(booking => (
-                    <div key={booking._id} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
-                        <div className="flex justify-between items-start mb-2">
+                    <div key={booking._id} className="rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm">
+                        <div className="mb-2 flex items-start justify-between">
                             <div>
-                                <h3 className="font-bold text-lg">{booking.service}</h3>
+                                <h3 className="text-lg font-bold">{booking.service}</h3>
                                 <p className="text-sm text-gray-600">{booking.clientId?.name || "Client"}</p>
                             </div>
                             {getStatusBadge(booking.status)}
                         </div>
-                        <div className="text-sm text-gray-600 mb-4">
+                        <div className="mb-4 text-sm text-gray-600">
                              <p>📅 {booking.date} at {booking.time}</p>
-                             <p className="font-semibold text-green-600 mt-1">₹{booking.price}</p>
+                             <p className="mt-1 font-semibold text-green-600">₹{booking.price}</p>
                         </div>
                         <div className="flex gap-2">
                            {booking.status === "pending" && (
                               <>
                                 <button
                                   onClick={() => handleStatusUpdate(booking._id, "confirmed")}
-                                  className="flex-1 bg-green-500 text-white py-2 rounded shadow text-sm"
+                                  className="flex-1 rounded bg-green-500 py-2 text-sm text-white shadow"
                                 >
                                   Accept
                                 </button>
                                 <button
                                   onClick={() => handleStatusUpdate(booking._id, "cancelled")}
-                                  className="flex-1 bg-red-500 text-white py-2 rounded shadow text-sm"
+                                  className="flex-1 rounded bg-red-500 py-2 text-sm text-white shadow"
                                 >
                                   Reject
                                 </button>
@@ -196,7 +196,7 @@ export default function FreelancerBookings() {
                            {booking.status === "confirmed" && (
                                <button
                                  onClick={() => handleStatusUpdate(booking._id, "completed")}
-                                 className="flex-1 bg-blue-500 text-white py-2 rounded shadow text-sm"
+                                 className="flex-1 rounded bg-blue-500 py-2 text-sm text-white shadow"
                                >
                                  Mark Complete
                                </button>

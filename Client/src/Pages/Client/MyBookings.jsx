@@ -83,11 +83,13 @@ export default function MyBookings() {
       if (newTime) {
         try {
           const token = localStorage.getItem('token');
-          await axios.put(`/api/bookings/update/${bookingId}`, {
-            date: newDate,
-            time: newTime,
-            status: 'confirmed'
-          }, {
+          await axios.put(
+  `${import.meta.env.VITE_API_URL}/api/bookings/update/${bookingId}`,
+  {
+    date: newDate,
+    time: newTime,
+    status: 'confirmed'
+  }, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -128,9 +130,11 @@ export default function MyBookings() {
     if (result.isConfirmed) {
       try {
         const token = localStorage.getItem('token');
-        await axios.put(`/api/bookings/update/${bookingId}`, {
-          status: 'cancelled'
-        }, {
+       await axios.put(
+  `${import.meta.env.VITE_API_URL}/api/bookings/update/${bookingId}`,
+  {
+    status: 'cancelled'
+  }, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -164,7 +168,9 @@ export default function MyBookings() {
     }
 
     try {
-      const response = await axios.get('/api/bookings/client', {
+      const response = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/bookings/client`,
+  {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -389,27 +395,27 @@ export default function MyBookings() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col md:flex-row md:items-center gap-4">
-                      <div className="text-center">
-                        <p className="text-sm text-gray-500">Date & Time</p>
-                        <p className="font-semibold">{booking.date}</p>
-                        <p className="text-sm text-gray-600">{booking.time}</p>
-                      </div>
+<div className="flex flex-col md:items-center gap-4">
+  <div className="text-center">
+    <p className="text-sm text-gray-500">Date</p>
+    <p className="font-semibold">{booking.date}</p>
+    <p className="text-sm text-gray-600">{booking.time}</p>
+  </div>
 
-                      <div className="text-center">
-                        <p className="text-sm text-gray-500">Price</p>
-                        <p className="text-2xl font-bold text-green-600">{booking.price}</p>
-                      </div>
+  <div className="text-center">
+    <p className="text-sm text-gray-500">Price</p>
+    <p className="text-2xl font-bold text-green-600">{booking.price}</p>
+  </div>
 
-                      <div className="text-center">
+  <div className="mb-4 flex items-center">
                         <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(booking.status)}`}>
                           {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                         </span>
                       </div>
 
-                      {/* ⭐ UPCOMING ACTIONS */}
+                      {/* ⭐ UPCOMING SECTION */}
                       {activeTab === "upcoming" && (
-                        <div className="flex gap-2">
+                        <div className="mt-2">
                           <button
                             onClick={() => handleReschedule(booking.id)}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"

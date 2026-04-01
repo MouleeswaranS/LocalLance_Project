@@ -57,7 +57,9 @@ export default function FreelancerDashboard() {
 
     try {
       // 1. Fetch Dashboard Stats (using "me" endpoint)
-      const dashboardRes = await axios.get(`/api/freelancers/dashboard/me`, {
+      const dashboardRes = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/freelancers/dashboard/me`,
+  {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -83,7 +85,9 @@ export default function FreelancerDashboard() {
       // 2. Fetch Freelancer Profile for Services (using "me" endpoint)
       let freelancerRes = null;
       try {
-        freelancerRes = await axios.get(`/api/freelancers/profile/me`, {
+        freelancerRes = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/freelancers/profile/me`,
+  {
           headers: { Authorization: `Bearer ${token}` },
         });
       } catch (err) {

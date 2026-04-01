@@ -54,7 +54,9 @@ export default function PopularService() {
     const fetchFreelancers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/api/freelancers?service=${encodeURIComponent(service.name)}&limit=24`);
+        const response = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/freelancers?service=${encodeURIComponent(service.name)}&limit=24`
+);
         setFreelancers(response.data);
       } catch (error) {
         console.error('Error fetching freelancers:', error);
@@ -287,7 +289,9 @@ export default function PopularService() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('/api/bookings/create', {
+      await axios.post(
+  `${import.meta.env.VITE_API_URL}/api/bookings/create`,
+  {
         freelancerId: freelancer._id,
         freelancerName: freelancer.name,
         service: freelancer.services[0].name,
@@ -336,24 +340,24 @@ export default function PopularService() {
       {/* Hero Section */}
       <div
         ref={heroRef}
-        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-24 relative overflow-hidden"
+        className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 py-24 text-white"
       >
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-r from-indigo-500 to-purple-700 rounded-full blur-3xl opacity-20"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 opacity-20 blur-3xl"></div>
+          <div className="absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-20 blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-gradient-to-r from-indigo-500 to-purple-700 opacity-20 blur-3xl"></div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1
               ref={titleRef}
-              className="text-4xl md:text-5xl font-bold mb-4"
+              className="mb-4 text-4xl font-bold md:text-5xl"
             >
               {service.name} Services
             </h1>
             <p
               ref={descriptionRef}
-              className="text-xl mb-8 text-blue-100 max-w-3xl mx-auto"
+              className="mx-auto mb-8 max-w-3xl text-xl text-blue-100"
             >
               {serviceDetails.description}
             </p>
@@ -362,26 +366,26 @@ export default function PopularService() {
       </div>
 
       {/* Service Details */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mb-12 rounded-xl bg-white p-8 shadow-lg">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Service Features</h3>
+              <h3 className="mb-4 text-2xl font-bold text-gray-900">Service Features</h3>
               <ul className="space-y-2">
                 {serviceDetails.features.map((feature, index) => (
                   <li key={index} className="flex items-center text-gray-700">
-                    <span className="text-green-500 mr-2">✓</span>
+                    <span className="mr-2 text-green-500">✓</span>
                     {feature}
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Service Details</h3>
+              <h3 className="mb-4 text-2xl font-bold text-gray-900">Service Details</h3>
               <div className="space-y-4">
                 <div>
                   <span className="font-semibold text-gray-700">Average Price:</span>
-                  <span className="ml-2 text-green-600 font-bold">{serviceDetails.averagePrice}</span>
+                  <span className="ml-2 font-bold text-green-600">{serviceDetails.averagePrice}</span>
                 </div>
                 <div>
                   <span className="font-semibold text-gray-700">Popular In:</span>
@@ -400,17 +404,17 @@ export default function PopularService() {
         <div
           ref={freelancersRef}
         >
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
+          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900">
             Available {service.name} Professionals ({freelancers.length})
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {loading ? (
-              <div className="col-span-full text-center py-12">
+              <div className="col-span-full py-12 text-center">
                 <p className="text-xl text-gray-600">Loading freelancers...</p>
               </div>
             ) : freelancers.length === 0 ? (
-              <div className="col-span-full text-center py-12">
+              <div className="col-span-full py-12 text-center">
                 <p className="text-xl text-gray-600">No freelancers found for this service.</p>
               </div>
             ) : (
@@ -418,44 +422,44 @@ export default function PopularService() {
                 <div
                   key={freelancer._id}
                   ref={(el) => (freelancerCardsRef.current[index] = el)}
-                  className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                  className="overflow-hidden rounded-xl bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
                 >
                   <div className="p-6">
-                    <div className="flex items-center mb-4">
+                    <div className="mb-4 flex items-center">
                       <img
                         src={freelancer.image}
                         alt={freelancer.name}
-                        className="w-16 h-16 rounded-full object-cover mr-4"
+                        className="mr-4 h-16 w-16 rounded-full object-cover"
                       />
                       <div>
                         <h3 className="text-xl font-semibold text-gray-900">
                           {freelancer.name}
                         </h3>
-                        <p className="text-gray-600 font-bold">{freelancer.services[0].name}</p>
+                        <p className="font-bold text-gray-600">{freelancer.services[0].name}</p>
                         <p className="text-sm text-gray-500">{freelancer.address}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="mb-4 flex items-center justify-between">
                       <div className="flex items-center">
-                        <span className="text-yellow-400 text-lg">⭐</span>
-                        <span className="ml-1 text-gray-700 font-medium">
+                        <span className="text-lg text-yellow-400">⭐</span>
+                        <span className="ml-1 font-medium text-gray-700">
                           {freelancer.rating}
                         </span>
-                        <span className="ml-1 text-gray-500 text-sm">
+                        <span className="ml-1 text-sm text-gray-500">
                           ({freelancer.reviews})
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex justify-between text-sm text-gray-600 mb-4">
+                    <div className="mb-4 flex justify-between text-sm text-gray-600">
                       <span>Experience: {freelancer.experience}</span>
                       <span>Jobs: {freelancer.completedJobs}</span>
                     </div>
 
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                    <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-green-600 font-medium">Hourly Rate</span>
+                        <span className="text-sm font-medium text-green-600">Hourly Rate</span>
                         <span className="text-lg font-bold text-green-600">{freelancer.price}</span>
                       </div>
                     </div>
@@ -464,14 +468,14 @@ export default function PopularService() {
                       <button
                         onClick={() => handleQuickBook(freelancer)}
                         disabled={bookingLoading === freelancer._id}
-                        className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-2 px-3 rounded-lg transition-colors text-sm"
+                        className="flex-1 rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:bg-green-400"
                       >
                         {bookingLoading === freelancer._id ? 'Booking...' : 'Quick Book'}
                       </button>
                       <Link
                         to={`/client/freelancer/${freelancer._id}`}
                         state={{ freelancer }}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-colors text-sm text-center"
+                        className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-blue-700"
                       >
                         View Profile
                       </Link>
@@ -483,10 +487,10 @@ export default function PopularService() {
           </div>
 
           {freelancers.length > 24 && (
-            <div className="text-center mt-12">
+            <div className="mt-12 text-center">
               <Link
                 to={`/client/browse?service=${encodeURIComponent(service.name)}`}
-                className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-4 px-8 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
+                className="inline-block transform rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:from-blue-700 hover:to-purple-700"
               >
                 View All {service.name} Professionals
               </Link>

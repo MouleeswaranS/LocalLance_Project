@@ -42,14 +42,17 @@ export default function Signup() {
     setLoading(true);
     setError("");
 
-    try {
-      await axios.post("/api/auth/register", {
+  try {
+    await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/auth/register`,
+      {
         name,
         email,
         password,
         role,
         service: role === "freelancer" ? service : undefined,
-      });
+      }
+    );
 
       showSuccessMessage(`${role.charAt(0).toUpperCase() + role.slice(1)} account created successfully!`);
       setTimeout(() => {

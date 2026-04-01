@@ -86,7 +86,9 @@ export default function FreelancerProfile() {
       if (!freelancer && id) {
         try {
           setDataLoading(true);
-          const response = await axios.get(`/api/freelancers/${id}`);
+          const response = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/freelancers/${id}`
+);
           const freelancer = response.data;
           if (freelancer.services && !Array.isArray(freelancer.services)) {
             freelancer.services = Object.values(freelancer.services);
@@ -251,22 +253,22 @@ export default function FreelancerProfile() {
       {/* Hero Section */}
       <div
         ref={heroRef}
-        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-24 relative overflow-hidden"
+        className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 py-24 text-white"
       >
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-r from-indigo-500 to-purple-700 rounded-full blur-3xl opacity-20"></div>
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 opacity-20 blur-3xl"></div>
+          <div className="absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-20 blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-gradient-to-r from-indigo-500 to-purple-700 opacity-20 blur-3xl"></div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1
               ref={titleRef}
-              className="text-4xl md:text-5xl font-bold mb-4"
+              className="mb-4 text-4xl font-bold md:text-5xl"
             >
               Freelancer Profile
             </h1>
-            <p className="text-xl mb-8 text-blue-100">
+            <p className="mb-8 text-xl text-blue-100">
               Get to know your service provider
             </p>
           </div>
@@ -276,7 +278,7 @@ export default function FreelancerProfile() {
       {/* Profile Section */}
       <div
         ref={profileRef}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16"
+        className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8"
       >
         {dataLoading ? (
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -285,25 +287,25 @@ export default function FreelancerProfile() {
             </div>
           </div>
         ) : freelancerData ? (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="overflow-hidden rounded-xl bg-white shadow-lg">
             <div className="p-8">
-              <div className="flex flex-col md:flex-row items-start md:items-center mb-8">
+              <div className="mb-8 flex flex-col items-start md:flex-row md:items-center">
                 <img
                   src={freelancerData.image}
                   alt={freelancerData.name}
-                  className="w-32 h-32 rounded-full object-cover mb-4 md:mb-0 md:mr-8"
+                  className="mb-4 h-32 w-32 rounded-full object-cover md:mr-8 md:mb-0"
                 />
               <div className="flex-1">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                <h2 className="mb-2 text-3xl font-bold text-gray-900">
                   {freelancerData.name}
                 </h2>
-                <p className="text-xl text-gray-600 font-semibold mb-2">
+                <p className="mb-2 text-xl font-semibold text-gray-600">
                   {freelancerData.services && freelancerData.services.length > 0 ? (typeof freelancerData.services[0] === 'string' ? freelancerData.services[0] : freelancerData.services[0].name) : "No service"}
                 </p>
-                <p className="text-gray-500 mb-4">{freelancerData.location}</p>
+                <p className="mb-4 text-gray-500">{freelancerData.location}</p>
 
-                <div className="flex items-center mb-4">
-                  <span className="text-yellow-400 text-2xl">⭐</span>
+                <div className="mb-4 flex items-center">
+                  <span className="text-2xl text-yellow-400">⭐</span>
                   <span className="ml-2 text-xl font-semibold text-gray-900">
                     {freelancerData.rating}
                   </span>
@@ -312,7 +314,7 @@ export default function FreelancerProfile() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="text-center">
                     <p className="text-sm text-gray-500">Experience</p>
                     <p className="text-lg font-semibold text-gray-900">{freelancerData.experience}</p>
@@ -327,10 +329,10 @@ export default function FreelancerProfile() {
                   </div>
                 </div>
 
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-green-600 font-medium">Hourly Rate</p>
+                      <p className="text-sm font-medium text-green-600">Hourly Rate</p>
                       <p className="text-3xl font-bold text-green-600">{freelancerData.price}</p>
                     </div>
                     <div className="text-right">
@@ -344,17 +346,17 @@ export default function FreelancerProfile() {
           </div>
 
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">About</h3>
-              <p className="text-gray-600 leading-relaxed">{freelancerData.description}</p>
+              <h3 className="mb-4 text-2xl font-bold text-gray-900">About</h3>
+              <p className="leading-relaxed text-gray-600">{freelancerData.description}</p>
             </div>
 
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Skills</h3>
+              <h3 className="mb-4 text-2xl font-bold text-gray-900">Skills</h3>
               <div className="flex flex-wrap gap-2">
                 {freelancerData.skills.map((skill, index) => (
                   <span
                     key={index}
-                    className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                    className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
                   >
                     {skill}
                   </span>
@@ -362,7 +364,7 @@ export default function FreelancerProfile() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row">
               <Link
                 to={`/client/book/${freelancerData.id}`}
                 state={{ freelancer: freelancerData, from: 'profile' }}
@@ -376,7 +378,7 @@ export default function FreelancerProfile() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="overflow-hidden rounded-xl bg-white shadow-lg">
             <div className="p-8 text-center">
               <p className="text-xl text-gray-600">Freelancer not found.</p>
             </div>
